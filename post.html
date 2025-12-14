@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="icon" href="svg.png" type="image/x-icon">
+    <title>New Story</title>
+
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: 'Inter', system-ui, sans-serif;
+                background-color: #f4f4f4;
+                padding: 20px;
+            }
+            form {
+                width: 80%;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+            }
+            .blog-title {
+                font-family: 'Playfair Display', serif;
+                height: 70px;
+                font-size: 30px;
+                padding: 8px;
+                margin-bottom: 5px;
+                border: none;
+                box-shadow: gray 0 0 5px;
+                border-radius: 4px;
+                box-sizing: border-box;
+                transition: 0.3s;
+            }
+            .blog-title:focus {
+                outline: none;
+                box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+                border: 1px solid rgba(81, 203, 238, 1);
+            }
+            
+            #article-content {
+                font-family: 'Merriweather', serif;
+                width: 100%;
+                height: 560px;
+                font-size: 18px;
+                line-height: 1.5;
+                padding: 10px;
+                box-shadow: gray 0 0 5px;
+                border-radius: 4px;
+                box-sizing: border-box;
+                resize: vertical;
+            }
+            #article-content:focus {
+                outline: none;
+                box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+                border: 1px solid rgba(81, 203, 238, 1);
+            }
+        </style>
+</head>
+<body>
+    <form action="">
+        <input class="blog-title" type="text" name="Title" placeholder="Write your story..." required>
+
+        <textarea name="Content" id="article-content" cols="30" rows="10" placeholder="Tell your story..." required></textarea>
+    </form>
+
+
+</body>
+</html>
