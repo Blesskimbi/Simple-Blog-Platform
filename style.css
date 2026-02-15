@@ -817,7 +817,12 @@ body {
     background-color: var(--bg-secondary);
     border: none; /* Managed by container */
     border-radius: 8px;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
+    transition: background-color 0.2s ease;
+}
+
+.editor-container:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
 
 .editor-content:focus {
@@ -836,8 +841,7 @@ body {
     border-left: 4px solid var(--accent);
     padding: 10px 20px;
     margin: 20px 0;
-    background: var(--bg-secondary);
-    border-radius: 0 8px 8px 0;
+    /* Removed background to avoid textfield look */
     color: var(--text-primary);
     font-style: italic;
     font-size: 1.1em;

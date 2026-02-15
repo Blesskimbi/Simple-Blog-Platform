@@ -27,7 +27,7 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
                         <a class="nav-link" href="index.html">Home</a>
@@ -92,9 +92,8 @@
                                     <button type="button" class="format-btn" data-cmd="h3" title="Subheading">H3</button>
                                     <button type="button" class="format-btn" data-cmd="blockquote" title="Quote">""</button>
                                     <button type="button" class="format-btn" data-cmd="removeFormat" title="Clear Format">🧹</button>
-                                    <label class="format-btn" title="Color" style="cursor: pointer; margin-bottom: 0;">
-                                        🎨 <input type="color" id="colorInput" style="visibility: hidden; width: 0; height: 0; position: absolute;">
-                                    </label>
+                                    <button type="button" class="format-btn" id="colorBtn" title="Color">🎨</button>
+                                    <input type="color" id="colorInput" style="visibility: hidden; width: 0; height: 0; position: absolute;">
                                 </div>
                             </div>
 
@@ -285,15 +284,18 @@
         });
 
         // Color Picker
+        const colorBtn = document.getElementById('colorBtn');
         const colorInput = document.getElementById('colorInput');
         let savedSelection;
 
-        // Save selection when clicking the color button label
-        document.querySelector('label[title="Color"]').addEventListener('mousedown', () => {
+        colorBtn.addEventListener('mousedown', (e) => {
+             e.preventDefault(); // Prevent losing focus immediately
              const selection = window.getSelection();
              if (selection.rangeCount > 0) {
                  savedSelection = selection.getRangeAt(0);
              }
+             // Use minimal timeout to ensure UI is ready
+             setTimeout(() => colorInput.click(), 10);
         });
 
         colorInput.addEventListener('input', (e) => {
@@ -316,6 +318,24 @@
             document.execCommand(command, false, value);
             editor.focus();
         }
+
+        // Handle Enter key to break out of quotes and formatting
+        editor.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { // Shift+Enter for soft break
+                e.preventDefault();
+                // Insert new paragraph
+                document.execCommand('insertParagraph', false, null);
+                // Force it to be a plain paragraph, breaking out of blockquotes/headers
+                document.execCommand('formatBlock', false, 'p');
+                // Remove formatting from the new line
+                document.execCommand('removeFormat', false, null);
+                document.execCommand('unlink', false, null);
+                // Also explicitly turn off bold/italic if they persist (sometimes needed)
+                document.execCommand('bold', false, null);
+                if (document.queryCommandState('bold')) document.execCommand('bold', false, null);
+                if (document.queryCommandState('italic')) document.execCommand('italic', false, null);
+            }
+        });
 
         // Handle Form Submission
         document.getElementById('richPostForm').addEventListener('submit', async (e) => {
