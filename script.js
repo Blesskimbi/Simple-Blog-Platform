@@ -22,36 +22,44 @@ function toggleTheme() {
 
 function updateThemeIcon(theme) {
   document.getElementById("themeIcon").textContent =
-    theme === "dark" ? "☀️" : "🌙";
+    theme === "light" ? "🌙" : "☀️";
 }
 
 // Auth State Management
 async function checkAuth() {
-  // Check if on a protected page
-  const isProtectedPage = [
-    "dashboard.html",
-    "create-post.html",
-    "edit-post.html",
-  ].some((page) => window.location.pathname.includes(page));
+  const path = window.location.pathname.toLowerCase();
+  
+  // Define page groups
+  const protectedPages = ["dashboard.html", "create-post.html", "edit-post.html"];
+  const authPages = ["login.html", "signup.html"];
 
-  // First check localStorage mock auth (for demo)
+  const isProtectedPage = protectedPages.some(page => path.includes(page.toLowerCase()));
+  const isAuthPage = authPages.some(page => path.includes(page.toLowerCase()));
+
+  // Check auth state (Demo first, then Supabase)
   const mockUser = localStorage.getItem("demoUser");
-  if (mockUser) {
-    updateAuthUI(true);
-    return;
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  
+  const isAuthenticated = !!(mockUser || session);
+
+  // Sync localStorage isLoggedIn flag for consistency
+  if (isAuthenticated) {
+    localStorage.setItem("isLoggedIn", "true");
+  } else {
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("demoUser");
   }
 
-  // Then check real Supabase auth
-  const {
-    data: { session },
-  } = await supabaseClient.auth.getSession();
-  if (session) {
-    updateAuthUI(true);
-  } else if (isProtectedPage) {
-    // Redirect to login if on protected page and not authenticated
+  // Update navbar/UI based on auth state
+  updateAuthUI(isAuthenticated);
+
+  // Handle Redirections
+  if (isAuthenticated && isAuthPage) {
+    // If logged in, don't allow visiting login/signup
+    window.location.href = "dashboard.html";
+  } else if (!isAuthenticated && isProtectedPage) {
+    // If not logged in, don't allow visiting dashboard/create/edit
     window.location.href = "login.html";
-  } else {
-    updateAuthUI(false);
   }
 }
 

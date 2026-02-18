@@ -295,7 +295,7 @@
 </head>
 <body>
     <div class="theme-switch" onclick="toggleTheme()">
-        <span id="themeIcon">🌙</span>
+        <span id="themeIcon">☀️</span>
     </div>
 
     <div class="signup-container">
@@ -427,17 +427,8 @@
             }, 1000);
         });
 
-        // Check if already logged in
-        function checkAuth() {
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
-            if (isLoggedIn === 'true') {
-                window.location.href = 'dashboard.html';
-            }
-        }
-
         // Initialize
         initTheme();
-        checkAuth();
     </script>
 </body>
 </html>

@@ -56,7 +56,7 @@
                     <span class="sidebar-icon">🚪</span> Logout
                 </a>
                 <div class="sidebar-theme" onclick="toggleTheme()">
-                    <span id="themeIcon">🌙</span>
+                    <span id="themeIcon">☀️</span>
                 </div>
             </div>
         </aside>
@@ -416,7 +416,6 @@
             currentUserId = user ? user.id : (mockUser ? mockUser.id : null);
 
             if (!currentUserId) {
-                window.location.href = 'login.html';
                 return;
             }
 
@@ -502,7 +501,7 @@
                     return `
                         <tr>
                             <td class="ps-4">
-                                <a href="Post.html?id=${post.id}" class="fw-semibold text-decoration-none" style="color:var(--text-primary);">${plainTitle}</a>
+                                <a href="post.html?id=${post.id}" class="fw-semibold text-decoration-none" style="color:var(--text-primary);">${plainTitle}</a>
                             </td>
                             <td><span class="badge bg-success bg-opacity-10 text-success px-3 py-2">Published</span></td>
                             <td class="text-secondary">0</td>

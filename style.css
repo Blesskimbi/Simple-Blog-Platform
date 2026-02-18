@@ -1,19 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --bg-primary: #ffffff;
-  --bg-secondary: #fafafa;
-  --text-primary: #0f0f0f;
-  --text-secondary: #666666;
-  --border-color: #e5e5e5;
-  --card-bg: #ffffff;
-  --accent: #6366f1;
-  --accent-hover: #4f46e5;
-  --gradient-start: #6366f1;
-  --gradient-end: #8b5cf6;
-}
-
-[data-theme="dark"] {
   --bg-primary: #0a0a0a;
   --bg-secondary: #121212;
   --text-primary: #ffffff;
@@ -24,6 +11,19 @@
   --accent-hover: #7c3aed;
   --gradient-start: #7c3aed;
   --gradient-end: #a855f7;
+}
+
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #fafafa;
+  --text-primary: #0f0f0f;
+  --text-secondary: #666666;
+  --border-color: #e5e5e5;
+  --card-bg: #ffffff;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --gradient-start: #6366f1;
+  --gradient-end: #8b5cf6;
 }
 
 * {
