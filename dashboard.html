@@ -8,150 +8,343 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
-            <a class="navbar-brand" href="index.html">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#gradient)" />
-                    <path d="M2 17L12 22L22 17" stroke="url(#gradient)" stroke-width="2" />
-                    <defs>
-                        <linearGradient id="gradient" x1="2" y1="2" x2="22" y2="22">
-                            <stop offset="0%" style="stop-color:#6366f1" />
-                            <stop offset="100%" style="stop-color:#8b5cf6" />
-                        </linearGradient>
-                    </defs>
-                </svg>
-                BlogHub
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html">Home</a>
-                    </li>
-                    <li class="nav-item" id="dashboardLink">
-                        <a class="nav-link active" href="dashboard.html">Dashboard</a>
-                    </li>
-                    <li class="nav-item ms-3">
-                        <div class="theme-switch" onclick="toggleTheme()">
-                            <span id="themeIcon">🌙</span>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="dash-sidebar" id="dashSidebar">
+            <div class="sidebar-brand">
+                <a href="index.html" class="d-flex align-items-center gap-2 text-decoration-none">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#sg)" />
+                        <path d="M2 17L12 22L22 17" stroke="url(#sg)" stroke-width="2" />
+                        <defs><linearGradient id="sg" x1="2" y1="2" x2="22" y2="22">
+                            <stop offset="0%" stop-color="#6366f1" /><stop offset="100%" stop-color="#8b5cf6" />
+                        </linearGradient></defs>
+                    </svg>
+                    <span class="sidebar-brand-text">BlogHub</span>
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="sidebar-link active" data-section="section-overview">
+                    <span class="sidebar-icon">🏠</span> Overview
+                </a>
+                <a href="#" class="sidebar-link" data-section="section-blogs">
+                    <span class="sidebar-icon">✍</span> My Blogs
+                </a>
+                <a href="create-post.html" class="sidebar-link">
+                    <span class="sidebar-icon">➕</span> New Post
+                </a>
+                <a href="#" class="sidebar-link" data-section="section-drafts">
+                    <span class="sidebar-icon">💾</span> Drafts
+                </a>
+                <a href="#" class="sidebar-link" data-section="section-bookmarks">
+                    <span class="sidebar-icon">🔖</span> Bookmarks
+                </a>
+                <a href="#" class="sidebar-link" data-section="section-profile">
+                    <span class="sidebar-icon">👤</span> Profile
+                </a>
+                <a href="#" class="sidebar-link" data-section="section-settings">
+                    <span class="sidebar-icon">⚙</span> Settings
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link" onclick="handleLogout(); return false;">
+                    <span class="sidebar-icon">🚪</span> Logout
+                </a>
+                <div class="sidebar-theme" onclick="toggleTheme()">
+                    <span id="themeIcon">🌙</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mobile Top Bar -->
+        <div class="dash-mobile-bar d-lg-none">
+            <button class="dash-hamburger" id="sidebarToggle" aria-label="Toggle sidebar">☰</button>
+            <span class="fw-semibold">BlogHub</span>
+            <div class="sidebar-theme" onclick="toggleTheme()" style="width:32px;height:32px;">
+                <span id="themeIconMobile">🌙</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="dash-main">
+            <div id="alertContainer"></div>
+
+            <!-- ===== OVERVIEW ===== -->
+            <div class="dash-section active" id="section-overview">
+                <h1 class="dash-page-title">Overview</h1>
+                <p class="text-secondary mb-4">Welcome back! Here's a quick snapshot.</p>
+
+                <div class="row g-4 mb-5">
+                    <div class="col-6 col-lg-3">
+                        <div class="stat-card">
+                            <div class="stat-card-icon">📝</div>
+                            <div class="stat-card-value" id="statTotalBlogs">0</div>
+                            <div class="stat-card-label">Total Blogs</div>
                         </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="stat-card">
+                            <div class="stat-card-icon">👁️</div>
+                            <div class="stat-card-value" id="statTotalViews">0</div>
+                            <div class="stat-card-label">Total Views</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="stat-card">
+                            <div class="stat-card-icon">❤️</div>
+                            <div class="stat-card-value" id="statTotalLikes">0</div>
+                            <div class="stat-card-label">Total Likes</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="stat-card">
+                            <div class="stat-card-icon">💬</div>
+                            <div class="stat-card-value" id="statTotalComments">0</div>
+                            <div class="stat-card-label">Total Comments</div>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- Dashboard Section -->
-    <section class="container py-5" style="margin-top: 80px;">
-        <!-- Dashboard Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="h2 mb-1">My Dashboard</h1>
-                <p class="text-secondary mb-0">Manage your posts and content</p>
-            </div>
-            <a href="create-post.html" class="btn btn-primary">
-                ✏️ New Post
-            </a>
-        </div>
+                <!-- Simple bar chart -->
+                <div class="dash-card mb-5">
+                    <h2 class="dash-card-title">Views — Last 7 Days</h2>
+                    <div class="chart-container" id="viewsChart">
+                        <div class="chart-bar-group">
+                            <div class="chart-bar" style="--bar-height: 30%;" data-value="12"><div class="chart-bar-fill"></div></div>
+                            <span class="chart-label">Mon</span>
+                        </div>
+                        <div class="chart-bar-group">
+                            <div class="chart-bar" style="--bar-height: 50%;" data-value="20"><div class="chart-bar-fill"></div></div>
+                            <span class="chart-label">Tue</span>
+                        </div>
+                        <div class="chart-bar-group">
+                            <div class="chart-bar" style="--bar-height: 40%;" data-value="16"><div class="chart-bar-fill"></div></div>
+                            <span class="chart-label">Wed</span>
+                        </div>
+                        <div class="chart-bar-group">
+                            <div class="chart-bar" style="--bar-height: 70%;" data-value="28"><div class="chart-bar-fill"></div></div>
+                            <span class="chart-label">Thu</span>
+                        </div>
+                        <div class="chart-bar-group">
+                            <div class="chart-bar" style="--bar-height: 55%;" data-value="22"><div class="chart-bar-fill"></div></div>
+                            <span class="chart-label">Fri</span>
+                        </div>
+                        <div class="chart-bar-group">
+                            <div class="chart-bar" style="--bar-height: 85%;" data-value="34"><div class="chart-bar-fill"></div></div>
+                            <span class="chart-label">Sat</span>
+                        </div>
+                        <div class="chart-bar-group">
+                            <div class="chart-bar" style="--bar-height: 65%;" data-value="26"><div class="chart-bar-fill"></div></div>
+                            <span class="chart-label">Sun</span>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Stats Cards -->
-        <div class="row g-4 mb-5" id="statsRow">
-            <div class="col-md-4">
-                <div class="card p-4">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="stat-icon" style="font-size: 2rem;">📝</div>
+                <!-- Recent Activity -->
+                <div class="dash-card">
+                    <h2 class="dash-card-title">Recent Activity</h2>
+                    <div id="recentActivity">
+                        <div class="activity-item">
+                            <span class="activity-dot"></span>
+                            <div>
+                                <p class="mb-0">No recent activity yet.</p>
+                                <small class="text-secondary">Start by creating your first post!</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== MY BLOGS ===== -->
+            <div class="dash-section" id="section-blogs">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="dash-page-title mb-0">My Blogs</h1>
+                    <a href="create-post.html" class="btn btn-primary">✏️ New Post</a>
+                </div>
+
+                <div class="dash-card p-0">
+                    <!-- Loading -->
+                    <div id="blogsLoading" class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="table-responsive" id="blogsTableWrapper" style="display:none;">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Title</th>
+                                    <th>Status</th>
+                                    <th>Views</th>
+                                    <th>Date</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="blogsTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Empty -->
+                    <div id="blogsEmpty" class="text-center py-5" style="display:none;">
+                        <div class="empty-icon">📝</div>
+                        <h3>No posts yet</h3>
+                        <p class="text-secondary">Start sharing your ideas with the world!</p>
+                        <a href="create-post.html" class="btn btn-primary">Create Your First Post</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== DRAFTS ===== -->
+            <div class="dash-section" id="section-drafts">
+                <h1 class="dash-page-title">Drafts</h1>
+                <p class="text-secondary mb-4">Posts you haven't published yet.</p>
+
+                <div id="draftsList">
+                    <div class="dash-card text-center py-5">
+                        <div class="empty-icon">💾</div>
+                        <h3>No drafts</h3>
+                        <p class="text-secondary">All your work is published. Nice!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== BOOKMARKS ===== -->
+            <div class="dash-section" id="section-bookmarks">
+                <h1 class="dash-page-title">Bookmarks</h1>
+                <p class="text-secondary mb-4">Posts you've saved for later.</p>
+
+                <div class="dash-card text-center py-5">
+                    <div class="empty-icon">🔖</div>
+                    <h3>No bookmarks yet</h3>
+                    <p class="text-secondary">Browse posts and bookmark the ones you love!</p>
+                    <a href="index.html" class="btn btn-primary">Browse Posts</a>
+                </div>
+            </div>
+
+            <!-- ===== PROFILE ===== -->
+            <div class="dash-section" id="section-profile">
+                <h1 class="dash-page-title">Profile</h1>
+                <p class="text-secondary mb-4">Manage your public profile.</p>
+
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <div class="dash-card text-center">
+                            <div class="profile-avatar-large" id="profileAvatar">👤</div>
+                            <h3 class="mt-3 mb-1" id="profileDisplayName">Your Name</h3>
+                            <p class="text-secondary" id="profileEmail">email@example.com</p>
+                            <hr>
+                            <div class="d-flex justify-content-around text-center">
+                                <div>
+                                    <div class="fw-bold" id="profilePostCount">0</div>
+                                    <small class="text-secondary">Posts</small>
+                                </div>
+                                <div>
+                                    <div class="fw-bold" id="profileFollowers">0</div>
+                                    <small class="text-secondary">Followers</small>
+                                </div>
+                            </div>
+                            <hr>
+                            <small class="text-secondary" id="profileJoined">Joined —</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="dash-card">
+                            <h2 class="dash-card-title">Edit Profile</h2>
+                            <form id="profileForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Display Name</label>
+                                    <input type="text" class="form-control" id="editDisplayName" placeholder="Your display name">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Bio</label>
+                                    <textarea class="form-control" id="editBio" rows="3" placeholder="Write something about yourself..."></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="editEmail" placeholder="your@email.com" disabled>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== SETTINGS ===== -->
+            <div class="dash-section" id="section-settings">
+                <h1 class="dash-page-title">Settings</h1>
+                <p class="text-secondary mb-4">Customize your experience.</p>
+
+                <div class="dash-card mb-4">
+                    <h2 class="dash-card-title">Appearance</h2>
+                    <div class="setting-row">
                         <div>
-                            <div class="h3 mb-0" id="totalPosts">0</div>
-                            <small class="text-secondary">Total Posts</small>
+                            <strong>Dark Mode</strong>
+                            <p class="text-secondary mb-0 small">Toggle between light and dark theme</p>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="settingDarkMode">
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card p-4">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="stat-icon" style="font-size: 2rem;">📅</div>
+
+                <div class="dash-card mb-4">
+                    <h2 class="dash-card-title">Notifications</h2>
+                    <div class="setting-row">
                         <div>
-                            <div class="h3 mb-0" id="latestPostDate">—</div>
-                            <small class="text-secondary">Latest Post</small>
+                            <strong>Email Notifications</strong>
+                            <p class="text-secondary mb-0 small">Receive email when someone interacts with your posts</p>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="settingEmailNotif" checked>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card p-4">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="stat-icon" style="font-size: 2rem;">👤</div>
+                    <div class="setting-row">
                         <div>
-                            <div class="h3 mb-0" id="userName">Author</div>
-                            <small class="text-secondary">Welcome back!</small>
+                            <strong>New Follower Alerts</strong>
+                            <p class="text-secondary mb-0 small">Get notified when someone follows you</p>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="settingFollowerNotif" checked>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Alert container -->
-        <div id="alertContainer"></div>
-
-        <!-- Posts List -->
-        <div class="card">
-            <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
-                <h2 class="h4 mb-0">Your Posts</h2>
-            </div>
-            <div class="card-body p-0">
-                <!-- Loading spinner -->
-                <div id="loadingSpinner" class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                <div class="dash-card mb-4">
+                    <h2 class="dash-card-title">Security</h2>
+                    <div class="setting-row">
+                        <div>
+                            <strong>Change Password</strong>
+                            <p class="text-secondary mb-0 small">Update your account password</p>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="alert('Password reset email sent!')">Change</button>
                     </div>
-                    <p class="text-secondary mt-2">Loading your posts...</p>
                 </div>
 
-                <!-- Post table -->
-                <div class="table-responsive" id="postsTableWrapper" style="display: none;">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th class="ps-4">Title</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                                <th class="text-end pe-4">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dashboardPostsBody">
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Empty state -->
-                <div id="emptyState" class="text-center py-5" style="display: none;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
-                    <h3>No posts yet</h3>
-                    <p class="text-secondary">Start sharing your ideas with the world!</p>
-                    <a href="create-post.html" class="btn btn-primary">Create Your First Post</a>
+                <div class="dash-card">
+                    <h2 class="dash-card-title text-danger">Danger Zone</h2>
+                    <div class="setting-row">
+                        <div>
+                            <strong>Delete Account</strong>
+                            <p class="text-secondary mb-0 small">Permanently delete your account and all your data</p>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="alert('Please contact support to delete your account.')">Delete</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </main>
+    </div>
 
-    <!-- Footer -->
-    <footer class="footer mt-auto">
-        <div class="container text-center py-4">
-            <p>&copy; 2024 BlogHub. All rights reserved.</p>
-        </div>
-    </footer>
-
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header border-0">
-                    <h5 class="modal-title" id="deleteModalLabel">⚠️ Delete Post</h5>
+                    <h5 class="modal-title">⚠️ Delete Post</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -169,143 +362,229 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
     <script>
-        let deletePostId = null;
+        // ========== SIDEBAR NAVIGATION ==========
+        const sidebarLinks = document.querySelectorAll('.sidebar-link[data-section]');
+        const sections = document.querySelectorAll('.dash-section');
 
-        // Load dashboard posts (user's own posts only)
-        async function loadDashboardPosts() {
-            const spinner = document.getElementById('loadingSpinner');
-            const tableWrapper = document.getElementById('postsTableWrapper');
-            const emptyState = document.getElementById('emptyState');
-            const tbody = document.getElementById('dashboardPostsBody');
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.dataset.section;
 
+                // Update active states
+                sidebarLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                sections.forEach(s => s.classList.remove('active'));
+                document.getElementById(targetId).classList.add('active');
+
+                // Close mobile sidebar
+                document.getElementById('dashSidebar').classList.remove('open');
+
+                // Load section data
+                if (targetId === 'section-blogs') loadMyBlogs();
+                if (targetId === 'section-profile') loadProfile();
+                if (targetId === 'section-overview') loadOverview();
+            });
+        });
+
+        // Mobile sidebar toggle
+        document.getElementById('sidebarToggle').addEventListener('click', () => {
+            document.getElementById('dashSidebar').classList.toggle('open');
+        });
+
+        // Settings: dark mode toggle
+        const darkModeToggle = document.getElementById('settingDarkMode');
+        darkModeToggle.checked = (localStorage.getItem('theme') || 'dark') === 'dark';
+        darkModeToggle.addEventListener('change', () => {
+            toggleTheme();
+            // Sync mobile icon
+            const icon = darkModeToggle.checked ? '☀️' : '🌙';
+            const themeIconMobile = document.getElementById('themeIconMobile');
+            if (themeIconMobile) themeIconMobile.textContent = icon;
+        });
+
+        // ========== DATA LOADING ==========
+        let currentUserId = null;
+
+        async function initDashboard() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const mockUser = JSON.parse(localStorage.getItem('demoUser'));
+            currentUserId = user ? user.id : (mockUser ? mockUser.id : null);
+
+            if (!currentUserId) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            loadOverview();
+        }
+
+        async function loadOverview() {
             try {
-                // Get current user
-                const { data: { user } } = await supabaseClient.auth.getUser();
-                const mockUser = JSON.parse(localStorage.getItem('demoUser'));
-                const userId = user ? user.id : (mockUser ? mockUser.id : null);
-
-                if (!userId) {
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                // Update user name in stats
-                const displayName = user?.user_metadata?.username || user?.email || mockUser?.username || 'Author';
-                document.getElementById('userName').textContent = displayName;
-
-                // Fetch user's posts
                 const { data: posts, error } = await supabaseClient
                     .from('posts')
                     .select('*')
-                    .eq('user_id', userId)
+                    .eq('user_id', currentUserId)
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
 
-                // Hide spinner
-                spinner.style.display = 'none';
+                document.getElementById('statTotalBlogs').textContent = posts ? posts.length : 0;
+                // Views/likes/comments are placeholders until columns exist
+                document.getElementById('statTotalViews').textContent = '0';
+                document.getElementById('statTotalLikes').textContent = '0';
+                document.getElementById('statTotalComments').textContent = '0';
 
-                // Update stats
-                document.getElementById('totalPosts').textContent = posts ? posts.length : 0;
+                // Recent activity from posts
+                const activityEl = document.getElementById('recentActivity');
+                if (posts && posts.length > 0) {
+                    activityEl.innerHTML = posts.slice(0, 5).map(post => {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = post.title;
+                        const title = tempDiv.textContent || 'Untitled';
+                        const date = new Date(post.created_at).toLocaleDateString('en-US', {
+                            month: 'short', day: 'numeric'
+                        });
+                        return `
+                            <div class="activity-item">
+                                <span class="activity-dot"></span>
+                                <div>
+                                    <p class="mb-0">Published "<strong>${title}</strong>"</p>
+                                    <small class="text-secondary">${date}</small>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error('Overview error:', err);
+            }
+        }
+
+        async function loadMyBlogs() {
+            const loading = document.getElementById('blogsLoading');
+            const tableWrapper = document.getElementById('blogsTableWrapper');
+            const emptyState = document.getElementById('blogsEmpty');
+            const tbody = document.getElementById('blogsTableBody');
+
+            loading.style.display = 'block';
+            tableWrapper.style.display = 'none';
+            emptyState.style.display = 'none';
+
+            try {
+                const { data: posts, error } = await supabaseClient
+                    .from('posts')
+                    .select('*')
+                    .eq('user_id', currentUserId)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                loading.style.display = 'none';
 
                 if (!posts || posts.length === 0) {
                     emptyState.style.display = 'block';
                     return;
                 }
 
-                // Latest post date
-                const latestDate = new Date(posts[0].created_at).toLocaleDateString('en-US', {
-                    month: 'short', day: 'numeric', year: 'numeric'
-                });
-                document.getElementById('latestPostDate').textContent = latestDate;
-
-                // Render posts table
                 tbody.innerHTML = posts.map(post => {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = post.title;
+                    const plainTitle = tempDiv.textContent || 'Untitled';
                     const date = new Date(post.created_at).toLocaleDateString('en-US', {
                         year: 'numeric', month: 'short', day: 'numeric'
                     });
-                    // Strip HTML tags for clean title display
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = post.title;
-                    const plainTitle = tempDiv.textContent || tempDiv.innerText || 'Untitled';
-                    // Excerpt from content
-                    tempDiv.innerHTML = post.content;
-                    const plainContent = tempDiv.textContent || tempDiv.innerText || '';
-                    const excerpt = plainContent.substring(0, 80) + (plainContent.length > 80 ? '...' : '');
 
                     return `
                         <tr>
                             <td class="ps-4">
-                                <div>
-                                    <a href="Post.html?id=${post.id}" class="fw-semibold text-decoration-none" style="color: var(--text-primary);">${plainTitle}</a>
-                                    <div class="text-secondary small mt-1">${excerpt}</div>
-                                </div>
+                                <a href="Post.html?id=${post.id}" class="fw-semibold text-decoration-none" style="color:var(--text-primary);">${plainTitle}</a>
                             </td>
-                            <td>
-                                <span class="text-secondary">${date}</span>
-                            </td>
-                            <td>
-                                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">Published</span>
-                            </td>
+                            <td><span class="badge bg-success bg-opacity-10 text-success px-3 py-2">Published</span></td>
+                            <td class="text-secondary">0</td>
+                            <td class="text-secondary">${date}</td>
                             <td class="text-end pe-4">
-                                <a href="edit-post.html?id=${post.id}" class="btn btn-sm btn-outline-primary me-2" title="Edit">
-                                    ✏️ Edit
-                                </a>
-                                <button class="btn btn-sm btn-outline-danger" onclick="showDeleteModal('${post.id}')" title="Delete">
-                                    🗑️ Delete
-                                </button>
+                                <a href="edit-post.html?id=${post.id}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+                                <button class="btn btn-sm btn-outline-danger" onclick="showDeleteModal('${post.id}')">Delete</button>
                             </td>
                         </tr>
                     `;
                 }).join('');
 
                 tableWrapper.style.display = 'block';
-
-            } catch (error) {
-                console.error('Error loading dashboard:', error);
-                spinner.style.display = 'none';
-                emptyState.innerHTML = `
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
-                    <h3>Error loading posts</h3>
-                    <p class="text-secondary">${error.message}</p>
-                    <button class="btn btn-primary" onclick="loadDashboardPosts()">Try Again</button>
-                `;
+            } catch (err) {
+                console.error('Error loading blogs:', err);
+                loading.style.display = 'none';
+                emptyState.innerHTML = `<div class="empty-icon">⚠️</div><h3>Error</h3><p class="text-secondary">${err.message}</p>`;
                 emptyState.style.display = 'block';
             }
         }
 
-        // Delete modal
+        async function loadProfile() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const mockUser = JSON.parse(localStorage.getItem('demoUser'));
+
+            const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || mockUser?.username || 'Author';
+            const email = user?.email || mockUser?.email || '—';
+
+            document.getElementById('profileDisplayName').textContent = displayName;
+            document.getElementById('profileEmail').textContent = email;
+            document.getElementById('editDisplayName').value = displayName;
+            document.getElementById('editEmail').value = email;
+
+            // Post count
+            const { data: posts } = await supabaseClient.from('posts').select('id').eq('user_id', currentUserId);
+            document.getElementById('profilePostCount').textContent = posts ? posts.length : 0;
+
+            // Joined date
+            const joined = user?.created_at || mockUser?.created_at;
+            if (joined) {
+                document.getElementById('profileJoined').textContent = 'Joined ' + new Date(joined).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            }
+        }
+
+        // Profile form
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newName = document.getElementById('editDisplayName').value.trim();
+            const newBio = document.getElementById('editBio').value.trim();
+
+            try {
+                const { error } = await supabaseClient.auth.updateUser({
+                    data: { username: newName, bio: newBio }
+                });
+                if (error) throw error;
+                showAlert('Profile updated!', 'success');
+                document.getElementById('profileDisplayName').textContent = newName;
+            } catch (err) {
+                showAlert(err.message, 'danger');
+            }
+        });
+
+        // ========== DELETE ==========
+        let deletePostId = null;
+
         function showDeleteModal(postId) {
             deletePostId = postId;
-            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            modal.show();
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
         }
 
         document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
             if (!deletePostId) return;
-
             const btn = document.getElementById('confirmDeleteBtn');
             btn.disabled = true;
             btn.textContent = 'Deleting...';
 
             try {
-                const { error } = await supabaseClient
-                    .from('posts')
-                    .delete()
-                    .eq('id', deletePostId);
-
+                const { error } = await supabaseClient.from('posts').delete().eq('id', deletePostId);
                 if (error) throw error;
-
-                // Close modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
-                modal.hide();
-
-                showAlert('Post deleted successfully!', 'success');
-                // Reload posts
-                loadDashboardPosts();
-            } catch (error) {
-                console.error('Delete error:', error);
-                showAlert('Error deleting post: ' + error.message, 'danger');
+                bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                showAlert('Post deleted!', 'success');
+                loadMyBlogs();
+                loadOverview();
+            } catch (err) {
+                showAlert('Error: ' + err.message, 'danger');
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Delete';
@@ -313,8 +592,8 @@
             }
         });
 
-        // Load dashboard
-        loadDashboardPosts();
+        // Init
+        initDashboard();
     </script>
 </body>
 </html>
