@@ -5,9 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Post - BlogHub</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Focus Mode Toggle -->
+    <button class="focus-toggle" id="focusToggle" title="Toggle Focus Mode">🎯</button>
+
+    <!-- Autosave Indicator -->
+    <div class="autosave-indicator" id="autosaveIndicator">
+        <span class="autosave-dot"></span>
+        <span id="autosaveText">Saved</span>
+    </div>
+
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
@@ -54,8 +66,47 @@
                         <h1 class="h3 mb-0">Create New Post</h1>
                     </div>
                     <div class="card-body p-4">
+                        <div id="draftRecoveryBanner"></div>
                         <div id="alertContainer"></div>
                         <form id="richPostForm">
+                            <!-- Customization Section -->
+                            <div class="post-customization-options mb-4">
+                                <div class="row align-items-center">
+                                    <div class="col-md-4">
+                                        <button type="button" class="btn btn-outline-secondary w-100 mb-2 mb-md-0" onclick="triggerCoverInput()">
+                                            🖼️ Add Layout Cover
+                                        </button>
+                                        <input type="text" id="coverUrlInput" class="form-control form-control-sm mt-1 d-none" placeholder="Paste image URL here...">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-transparent">🎨 Theme</span>
+                                            <select id="themeColorSelect" class="form-select">
+                                                <option value="var(--accent)">Default</option>
+                                                <option value="#ec4899">Pink</option>
+                                                <option value="#10b981">Emerald</option>
+                                                <option value="#f59e0b">Amber</option>
+                                                <option value="#3b82f6">Blue Bird</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-transparent">🔤 Font</span>
+                                            <select id="typographySelect" class="form-select" onchange="updateEditorTypography()">
+                                                <option value="'Inter', sans-serif">Modern Sans</option>
+                                                <option value="'Georgia', serif">Classic Serif</option>
+                                                <option value="'JetBrains Mono', monospace">Monospace</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="coverPreviewContainer" class="mt-3 d-none">
+                                    <img id="coverPreview" src="" class="post-cover-preview" alt="Cover preview">
+                                    <button type="button" class="btn btn-sm btn-danger mt-1" onclick="removeCover()">Remove Cover</button>
+                                </div>
+                            </div>
+
                             <div class="mb-3">
                                 <label for="postTitle" class="form-label">Title</label>
                                 <div id="postTitle" class="form-control form-control-lg" contenteditable="true" data-placeholder="Enter an engaging title"></div>
@@ -88,12 +139,26 @@
                                 <div id="formatToolbar" class="formatting-toolbar">
                                     <button type="button" class="format-btn" data-cmd="bold" title="Bold"><strong>B</strong></button>
                                     <button type="button" class="format-btn" data-cmd="italic" title="Italic"><em>I</em></button>
+                                    <button type="button" class="format-btn" data-cmd="strikeThrough" title="Strikethrough"><s>S</s></button>
                                     <button type="button" class="format-btn" data-cmd="h2" title="Heading">H2</button>
                                     <button type="button" class="format-btn" data-cmd="h3" title="Subheading">H3</button>
                                     <button type="button" class="format-btn" data-cmd="blockquote" title="Quote">""</button>
+                                    <button type="button" class="format-btn" data-cmd="insertLink" title="Insert Link">🔗</button>
                                     <button type="button" class="format-btn" data-cmd="removeFormat" title="Clear Format">🧹</button>
                                     <button type="button" class="format-btn" id="colorBtn" title="Color">🎨</button>
-                                    <input type="color" id="colorInput" style="visibility: hidden; width: 0; height: 0; position: absolute;">
+                                    <input type="color" id="colorInput" class="color-input-hidden">
+                                    <div class="format-btn-group" style="position:relative;">
+                                        <button type="button" class="format-btn" id="codeBlockBtn" title="Code Block">&lt;/&gt;</button>
+                                        <div class="code-lang-dropdown" id="codeLangDropdown">
+                                            <button type="button" data-lang="javascript">JavaScript</button>
+                                            <button type="button" data-lang="python">Python</button>
+                                            <button type="button" data-lang="html">HTML</button>
+                                            <button type="button" data-lang="css">CSS</button>
+                                            <button type="button" data-lang="java">Java</button>
+                                            <button type="button" data-lang="cpp">C++</button>
+                                            <button type="button" data-lang="plaintext">Plain Text</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -219,11 +284,13 @@
         }
 
         // --- Formatting Toolbar Handling ---
-        
+
+        // Make toolbar parent relative for positioning
+        formatToolbar.parentElement.style.position = 'relative';
+
         document.addEventListener('selectionchange', () => {
             const selection = window.getSelection();
-            
-            // Check if selection is within editor
+
             if (!editor.contains(selection.anchorNode)) {
                  formatToolbar.classList.remove('active');
                  return;
@@ -232,86 +299,136 @@
             if (selection.toString().length > 0) {
                 const range = selection.getRangeAt(0);
                 const rect = range.getBoundingClientRect();
-                
-                // Position toolbar
-                // Calculate relative to viewport, handling scroll is tricky with absolute
-                // Ideally append toolbar to body or use fixed positioning
-                // For simplicity, let's use fixed positioning based on rect
-                // But CSS has absolute... let's adjust CSS if needed or update style here
-                
-                // Better approach for relative parent:
-                // We need offset relative to the toolbar's offset parent (the .mb-3 container)
-                // Let's assume the toolbar is inside .mb-3 which is relative.
-                
-                // Actually, let's calculate relative to the viewport and verify CSS
-                // CSS: .formatting-toolbar is absolute. Parent is .mb-3? No, implicit parent is .mb-3 if it has position relative? No.
-                // Let's check HTML structure. Toolbar is in .mb-3 div (line 97).
-                // .mb-3 is bootstrap class, usually not relative.
-                // I might need to make the container relative.
-                
-                // Updating style here:
-                const containerRect = editor.parentElement.getBoundingClientRect(); // .mb-3 container
-                const top = rect.top - containerRect.top - 50; // 50px above selection
+                const containerRect = editor.parentElement.getBoundingClientRect();
+                const top = rect.top - containerRect.top - 50;
                 const left = rect.left - containerRect.left + (rect.width / 2) - (formatToolbar.offsetWidth / 2);
-                
+
                 formatToolbar.style.top = `${top}px`;
-                formatToolbar.style.left = `${left}px`;
+                formatToolbar.style.left = `${Math.max(0, left)}px`;
                 formatToolbar.classList.add('active');
+
+                // Update active states on format buttons
+                document.querySelectorAll('.format-btn[data-cmd]').forEach(btn => {
+                    const cmd = btn.dataset.cmd;
+                    if (cmd === 'bold' || cmd === 'italic' || cmd === 'strikeThrough') {
+                        btn.classList.toggle('is-active', document.queryCommandState(cmd));
+                    }
+                });
             } else {
                 formatToolbar.classList.remove('active');
             }
         });
 
-        // Initialize parent container relative position for toolbar
-        document.querySelector('.formatting-toolbar').parentElement.style.position = 'relative';
-
         // Toolbar Buttons
-        document.querySelectorAll('.format-btn').forEach(btn => {
+        document.querySelectorAll('.format-btn[data-cmd]').forEach(btn => {
             btn.addEventListener('mousedown', (e) => {
                 const cmd = btn.dataset.cmd;
-                if (cmd) {
-                     e.preventDefault(); // Prevent losing focus
-                     if (cmd === 'h2' || cmd === 'h3' || cmd === 'blockquote') {
-                         document.execCommand('formatBlock', false, cmd);
-                     } else if (cmd === 'removeFormat') {
-                        document.execCommand('removeFormat', false, null);
-                        document.execCommand('unlink', false, null); // Also remove links
-                     } else {
-                         document.execCommand(cmd, false, null);
-                     }
+                if (!cmd) return;
+                e.preventDefault();
+
+                if (cmd === 'h2') {
+                    document.execCommand('formatBlock', false, 'h2');
+                } else if (cmd === 'h3') {
+                    document.execCommand('formatBlock', false, 'h3');
+                } else if (cmd === 'blockquote') {
+                    document.execCommand('formatBlock', false, 'blockquote');
+                } else if (cmd === 'insertLink') {
+                    // Save selection before prompt
+                    const sel = window.getSelection();
+                    let linkRange = null;
+                    if (sel.rangeCount > 0) linkRange = sel.getRangeAt(0).cloneRange();
+                    const selectedText = sel.toString();
+
+                    const url = prompt('Enter URL:', 'https://');
+                    if (url && url !== 'https://') {
+                        // Restore selection
+                        if (linkRange) {
+                            sel.removeAllRanges();
+                            sel.addRange(linkRange);
+                        }
+                        if (selectedText) {
+                            document.execCommand('createLink', false, url);
+                            // Make links open in new tab
+                            setTimeout(() => {
+                                editor.querySelectorAll('a:not([target])').forEach(a => {
+                                    a.setAttribute('target', '_blank');
+                                    a.setAttribute('rel', 'noopener noreferrer');
+                                });
+                            }, 50);
+                        } else {
+                            const linkText = prompt('Enter link text:', 'Click here');
+                            if (linkText) {
+                                const html = `<a href="${url}" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
+                                document.execCommand('insertHTML', false, html);
+                            }
+                        }
+                    }
+                } else if (cmd === 'removeFormat') {
+                    document.execCommand('removeFormat', false, null);
+                    document.execCommand('unlink', false, null);
+                    document.execCommand('formatBlock', false, 'p');
+                } else {
+                    document.execCommand(cmd, false, null);
                 }
             });
         });
 
-        // Color Picker
+        // Color Picker — fixed
         const colorBtn = document.getElementById('colorBtn');
         const colorInput = document.getElementById('colorInput');
-        let savedSelection;
+        let savedSelection = null;
 
         colorBtn.addEventListener('mousedown', (e) => {
-             e.preventDefault(); // Prevent losing focus immediately
-             const selection = window.getSelection();
-             if (selection.rangeCount > 0) {
-                 savedSelection = selection.getRangeAt(0);
+             e.preventDefault();
+             const sel = window.getSelection();
+             if (sel.rangeCount > 0) {
+                 savedSelection = sel.getRangeAt(0).cloneRange();
              }
-             // Use minimal timeout to ensure UI is ready
              setTimeout(() => colorInput.click(), 10);
         });
 
-        colorInput.addEventListener('input', (e) => {
-            // Restore selection
+        colorInput.addEventListener('change', (e) => {
             if (savedSelection) {
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(savedSelection);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(savedSelection);
             }
             document.execCommand('foreColor', false, e.target.value);
+            savedSelection = null;
         });
-        
+
+        // Code Block — dropdown
+        const codeBlockBtn = document.getElementById('codeBlockBtn');
+        const codeLangDropdown = document.getElementById('codeLangDropdown');
+
+        codeBlockBtn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            codeLangDropdown.classList.toggle('show');
+        });
+
+        codeLangDropdown.querySelectorAll('button').forEach(langBtn => {
+            langBtn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                const lang = langBtn.dataset.lang;
+                const html = `<div class="code-block" data-lang="${lang}" contenteditable="false"><div class="code-block-header"><span>${lang}</span><button onclick="this.parentElement.parentElement.remove()" class="code-block-remove">&times;</button></div><pre><code contenteditable="true">// Write your ${lang} code here...</code></pre></div><p><br></p>`;
+                editor.focus();
+                document.execCommand('insertHTML', false, html);
+                codeLangDropdown.classList.remove('show');
+                formatToolbar.classList.remove('active');
+            });
+        });
+
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            if (!codeBlockBtn.contains(e.target) && !codeLangDropdown.contains(e.target)) {
+                codeLangDropdown.classList.remove('show');
+            }
+        });
+
         // Ensure editor sidebar doesn't block clicks
         document.querySelector('.editor-sidebar').style.pointerEvents = 'none';
-        document.getElementById('toggleTools').style.pointerEvents = 'auto'; // Re-enable for button
-        document.getElementById('toolsMenu').style.pointerEvents = 'auto'; // Re-enable for menu
+        document.getElementById('toggleTools').style.pointerEvents = 'auto';
+        document.getElementById('toolsMenu').style.pointerEvents = 'auto';
 
 
         function execCmd(command, value = null) {
@@ -366,13 +483,25 @@
 
                 if (!userId) throw new Error("You must be logged in.");
 
+                const coverUrl = document.getElementById('coverUrlInput').value.trim();
+                const themeColor = document.getElementById('themeColorSelect').value;
+                const typography = document.getElementById('typographySelect').value;
+
                 const { error } = await supabaseClient
                     .from('posts')
-                    .insert([{ title: titleContent, content, user_id: userId }]);
+                    .insert([{ 
+                        title: titleContent, 
+                        content, 
+                        user_id: userId,
+                        cover_url: coverUrl || null,
+                        theme_color: themeColor,
+                        typography: typography
+                    }]);
 
                 if (error) throw error;
 
                 showAlert('Post published successfully!', 'success');
+                localStorage.removeItem('bloghub_draft_create');
                 setTimeout(() => window.location.href = 'dashboard.html', 1500);
             } catch (err) {
                 console.error('Error:', err);
@@ -381,6 +510,154 @@
                 submitBtn.textContent = 'Publish Post';
             }
         });
+
+        // ========== FOCUS MODE ==========
+        document.getElementById('focusToggle').addEventListener('click', () => {
+            document.body.classList.toggle('focus-mode');
+        });
+
+        // ========== AUTOSAVE + DRAFT RECOVERY ==========
+        const DRAFT_KEY = 'bloghub_draft_create';
+        const autosaveIndicator = document.getElementById('autosaveIndicator');
+        const autosaveText = document.getElementById('autosaveText');
+        let lastSaveTime = null;
+        let autosaveTimer = null;
+        let elapsedTimer = null;
+
+        function saveDraft() {
+            const titleEl = document.getElementById('postTitle');
+            const draft = {
+                title: titleEl.innerHTML,
+                content: editor.innerHTML,
+                savedAt: Date.now()
+            };
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+            lastSaveTime = Date.now();
+
+            // Show indicator
+            autosaveIndicator.classList.add('saving');
+            autosaveIndicator.classList.add('visible');
+            autosaveText.textContent = 'Saving...';
+
+            setTimeout(() => {
+                autosaveIndicator.classList.remove('saving');
+                updateElapsed();
+            }, 600);
+        }
+
+        function updateElapsed() {
+            if (!lastSaveTime) return;
+            const seconds = Math.floor((Date.now() - lastSaveTime) / 1000);
+            if (seconds < 5) {
+                autosaveText.textContent = 'Saved just now';
+            } else if (seconds < 60) {
+                autosaveText.textContent = `Saved ${seconds}s ago`;
+            } else {
+                const mins = Math.floor(seconds / 60);
+                autosaveText.textContent = `Saved ${mins}m ago`;
+            }
+        }
+
+        // Auto-save every 7 seconds
+        function startAutosave() {
+            autosaveTimer = setInterval(() => {
+                const titleEl = document.getElementById('postTitle');
+                if (titleEl.textContent.trim() || editor.textContent.trim()) {
+                    saveDraft();
+                }
+            }, 7000);
+
+            // Update elapsed time display every second
+            elapsedTimer = setInterval(updateElapsed, 1000);
+        }
+
+        startAutosave();
+
+        // Draft recovery on load
+        function checkDraftRecovery() {
+            const saved = localStorage.getItem(DRAFT_KEY);
+            if (!saved) return;
+
+            try {
+                const draft = JSON.parse(saved);
+                // Only offer recovery if draft has content and is less than 24h old
+                const age = Date.now() - draft.savedAt;
+                if (age > 24 * 60 * 60 * 1000) {
+                    localStorage.removeItem(DRAFT_KEY);
+                    return;
+                }
+
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = draft.title;
+                const titlePreview = tempDiv.textContent.trim();
+                if (!titlePreview && !draft.content.replace(/<[^>]*>/g, '').trim()) return;
+
+                const timeSaved = new Date(draft.savedAt).toLocaleString();
+                const banner = document.getElementById('draftRecoveryBanner');
+                banner.innerHTML = `
+                    <div class="draft-recovery-banner">
+                        <p>📄 You have an unsaved draft${titlePreview ? ': <strong>' + titlePreview + '</strong>' : ''} <small class="text-secondary">(${timeSaved})</small></p>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-primary" onclick="restoreDraft()">Restore</button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="dismissDraft()">Dismiss</button>
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                localStorage.removeItem(DRAFT_KEY);
+            }
+        }
+
+        function restoreDraft() {
+            const saved = localStorage.getItem(DRAFT_KEY);
+            if (!saved) return;
+            const draft = JSON.parse(saved);
+            document.getElementById('postTitle').innerHTML = draft.title || '';
+            editor.innerHTML = draft.content || '';
+            document.getElementById('draftRecoveryBanner').innerHTML = '';
+            showAlert('Draft restored!', 'success');
+        }
+
+        function dismissDraft() {
+            localStorage.removeItem(DRAFT_KEY);
+            document.getElementById('draftRecoveryBanner').innerHTML = '';
+        }
+
+        checkDraftRecovery();
+
+        // Clear draft on successful publish
+        const originalSubmitHandler = document.getElementById('richPostForm');
+        // (Draft is cleared inside the submit success callback below is not needed since
+        //  the page redirects on success, but let's clear it to be safe)
+        // --- Post Customization Logic ---
+        function triggerCoverInput() {
+            const input = document.getElementById('coverUrlInput');
+            input.classList.toggle('d-none');
+            input.focus();
+        }
+
+        document.getElementById('coverUrlInput').addEventListener('input', (e) => {
+            const url = e.target.value.trim();
+            const preview = document.getElementById('coverPreview');
+            const container = document.getElementById('coverPreviewContainer');
+            if (url) {
+                preview.src = url;
+                container.classList.remove('d-none');
+            } else {
+                container.classList.add('d-none');
+            }
+        });
+
+        function removeCover() {
+            document.getElementById('coverUrlInput').value = '';
+            document.getElementById('coverPreviewContainer').classList.add('d-none');
+        }
+
+        function updateEditorTypography() {
+            const font = document.getElementById('typographySelect').value;
+            editor.style.fontFamily = font;
+            document.getElementById('postTitle').style.fontFamily = font;
+        }
     </script>
 </body>
 </html>

@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile - BlogHub</title>
+    <title>Profile - BlogHub</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,34 +15,187 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="index.html">BlogHub</a>
-            <!-- Will be populated by script.js -->
-             <div class="collapse navbar-collapse" id="navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
-                    <li class="nav-item" id="dashboardLink"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
-                    <li class="nav-item ms-3"><div class="theme-switch" onclick="toggleTheme()"><span id="themeIcon">🌙</span></div></li>
-                    <!-- Auth/Profile section handled by JS -->
-                    <li class="nav-item ms-3" id="authButtons">
-                        <a href="login.html" class="btn btn-outline-secondary me-2">Login</a>
-                        <a href="signup.html" class="btn btn-primary">Sign Up</a>
+                    <li class="nav-item" id="dashboardLink" style="display:none;"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+                    <li class="nav-item ms-3">
+                        <div class="theme-switch" onclick="toggleTheme()">
+                            <span id="themeIcon">🌙</span>
+                        </div>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container py-5 mt-5">
+    <!-- Profile Hero Area -->
+    <header class="profile-hero">
+        <div class="container">
+            <div id="authorAvatarXl" class="profile-avatar-xl">?</div>
+            <h1 id="authorName" class="profile-name">Loading...</h1>
+            <p id="authorBio" class="profile-bio">Sharing stories that matter to the world.</p>
+            
+            <div id="socialLinks" class="profile-social-links">
+                <!-- Generic social placeholders -->
+                <a href="#"><span class="me-1">🌐</span> Website</a>
+                <a href="#"><span class="me-1">🐦</span> Twitter</a>
+                <a href="#"><span class="me-1">💻</span> GitHub</a>
+            </div>
+
+            <button id="followBtn" class="profile-follow-btn d-none" onclick="toggleFollow()">Follow</button>
+        </div>
+    </header>
+
+    <!-- Stats Section -->
+    <section class="container">
         <div class="row justify-content-center">
-            <div class="col-md-8 text-center">
-                <h1>User Profile</h1>
-                <p class="lead">Profile management coming soon!</p>
-                <button onclick="handleLogout()" class="btn btn-danger mt-3">Logout</button>
+            <div class="col-lg-8">
+                <div class="profile-stats-row">
+                    <div class="profile-stat">
+                        <span class="stat-value" id="countBlogs">0</span>
+                        <span class="stat-label">Blogs</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-value" id="countReads">--</span>
+                        <span class="stat-label">Total Reads</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-value" id="countFollowers">0</span>
+                        <span class="stat-label">Followers</span>
+                    </div>
+                </div>
+
+                <hr class="my-5">
+
+                <h3 class="mb-4">Published Stories</h3>
+                <div id="authorPosts" class="profile-posts-grid">
+                    <!-- Posts will be injected here -->
+                </div>
             </div>
         </div>
-    </div>
+    </section>
+
+    <footer class="footer py-5 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2026 BlogHub. All rights reserved.</p>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        let profileUserId = urlParams.get('user');
+
+        async function initProfilePage() {
+            try {
+                const { data: { user: currentUser } } = await supabaseClient.auth.getUser();
+                
+                // If no user param, default to current user
+                if (!profileUserId && currentUser) {
+                    profileUserId = currentUser.id;
+                }
+
+                if (!profileUserId) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                // Fetch profile data
+                const { data: profile, error } = await supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', profileUserId)
+                    .single();
+
+                if (error && error.code !== 'PGRST116') throw error;
+
+                if (profile) {
+                    document.getElementById('authorName').textContent = profile.username || 'Anonymous';
+                    if (profile.bio) document.getElementById('authorBio').textContent = profile.bio;
+                    document.getElementById('authorAvatarXl').textContent = (profile.username || 'A').charAt(0).toUpperCase();
+                } else {
+                     // Fallback for simple user record if profile record doesn't exist
+                     document.getElementById('authorName').textContent = 'Community Writer';
+                }
+
+                // Show follow button if not own profile
+                if (currentUser && currentUser.id !== profileUserId) {
+                    const followBtn = document.getElementById('followBtn');
+                    followBtn.classList.remove('d-none');
+                    updateFollowState();
+                }
+
+                // Fetch user's posts
+                const { data: posts, error: postError } = await supabaseClient
+                    .from('posts')
+                    .select('*')
+                    .eq('user_id', profileUserId)
+                    .order('created_at', { ascending: false });
+
+                if (postError) throw postError;
+
+                renderAuthorPosts(posts);
+                document.getElementById('countBlogs').textContent = posts.length;
+
+            } catch (err) {
+                console.error('Error loading profile:', err);
+            }
+        }
+
+        function renderAuthorPosts(posts) {
+            const container = document.getElementById('authorPosts');
+            if (posts.length === 0) {
+                container.innerHTML = '<p class="text-center text-secondary w-100 py-4">No stories published yet.</p>';
+                return;
+            }
+
+            container.innerHTML = posts.map(post => {
+                const excerpt = post.content.replace(/<[^>]*>/g, '').substring(0, 100) + '...';
+                return `
+                    <div class="post-card" onclick="viewPost('${post.id}')">
+                        <span class="post-category">📝 Article</span>
+                        <h3 class="post-title">${post.title}</h3>
+                        <p class="post-excerpt">${excerpt}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewPost(id) {
+            window.location.href = `post.html?id=${id}`;
+        }
+
+        function toggleFollow() {
+            const followers = parseInt(localStorage.getItem(`followers_${profileUserId}`) || '0');
+            const isFollowing = localStorage.getItem(`is_following_${profileUserId}`) === 'true';
+
+            if (isFollowing) {
+                localStorage.setItem(`followers_${profileUserId}`, followers - 1);
+                localStorage.setItem(`is_following_${profileUserId}`, 'false');
+            } else {
+                localStorage.setItem(`followers_${profileUserId}`, followers + 1);
+                localStorage.setItem(`is_following_${profileUserId}`, 'true');
+            }
+            updateFollowState();
+        }
+
+        function updateFollowState() {
+            const followers = localStorage.getItem(`followers_${profileUserId}`) || '0';
+            const isFollowing = localStorage.getItem(`is_following_${profileUserId}`) === 'true';
+            
+            document.getElementById('countFollowers').textContent = followers;
+            const btn = document.getElementById('followBtn');
+            btn.textContent = isFollowing ? 'Following' : 'Follow';
+            btn.classList.toggle('is-following', isFollowing);
+        }
+
+        initProfilePage();
+    </script>
 </body>
 </html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post - BlogHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific tweaks for post content rendering if needed */
+        .post-content-body pre {
+            background: #1e1e2e;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Reading Progress Bar -->
+    <div id="readingProgress" class="reading-progress"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">BlogHub</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item" id="dashboardLink" style="display:none;"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+                    <li class="nav-item ms-3">
+                        <div class="theme-switch" onclick="toggleTheme()">
+                            <span id="themeIcon">🌙</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Post Hero Area -->
+    <header class="post-hero mt-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <img id="postCover" class="post-cover d-none" src="" alt="Post cover">
+                    <div id="postCategory" class="post-category d-none">📝 Article</div>
+                    <h1 id="postTitle">Loading post...</h1>
+                    
+                    <div class="post-meta-bar">
+                        <a href="#" id="authorLink" class="author-link">
+                            <div id="authorAvatar" class="author-avatar" style="width:32px; height:32px; font-size:14px;">?</div>
+                            <span id="authorName">Author</span>
+                        </a>
+                        <div class="dot-sep"></div>
+                        <span id="postDate">Date</span>
+                        <div class="dot-sep"></div>
+                        <div class="reading-time">
+                            <span>⏱️</span>
+                            <span id="readingTime">Calculating...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <article class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div id="postContent" class="post-content-body">
+                    <!-- Post content will be injected here -->
+                </div>
+
+                <!-- Post Author Card at Bottom -->
+                <div class="post-author-card">
+                    <div id="authorAvatarLg" class="author-avatar-lg">?</div>
+                    <div class="author-details">
+                        <h4 id="authorNameLg">Author Name</h4>
+                        <p id="authorBio">This author hasn't shared their bio yet. But they certainly write great stories!</p>
+                        <div class="mt-2">
+                             <a href="#" id="viewProfileBtn" class="btn btn-sm btn-outline-primary rounded-pill">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comments Section -->
+                <section class="comments-section" id="comments">
+                    <h3>Comments (<span id="commentCount">0</span>)</h3>
+                    
+                    <div id="commentForm" class="comment-form d-none">
+                        <div id="currentUserAvatar" class="comment-avatar">U</div>
+                        <div class="w-100">
+                            <textarea id="commentInput" placeholder="Write a thoughtful response..."></textarea>
+                            <div class="text-end mt-2">
+                                <button onclick="postComment()" class="btn btn-primary btn-sm rounded-pill px-3">Publish</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="loginToComment" class="mb-4 text-center p-4 bg-secondary rounded-3">
+                        <p class="mb-2">Log in to join the conversation.</p>
+                        <a href="login.html" class="btn btn-outline-primary btn-sm rounded-pill">Login / Sign Up</a>
+                    </div>
+
+                    <div id="commentsList">
+                        <!-- Comments will be injected here -->
+                    </div>
+                </section>
+            </div>
+        </div>
+    </article>
+
+    <!-- Floating Engagement Bar -->
+    <div class="engagement-bar">
+        <button class="engage-btn" onclick="handleClaps()" id="clapBtn">
+            <span class="engage-icon">👏</span>
+            <span class="engage-count" id="clapCount">0</span>
+        </button>
+        <div class="engage-separator"></div>
+        <a href="#comments" class="engage-btn">
+            <span class="engage-icon">💬</span>
+            <span class="engage-count" id="footerCommentCount">0</span>
+        </a>
+        <div class="engage-separator"></div>
+        <button class="engage-btn" onclick="toggleBookmark()" id="bookmarkBtn">
+            <span class="engage-icon" id="bookmarkIcon">🔖</span>
+        </button>
+        <div class="engage-separator"></div>
+        <button class="engage-btn" onclick="copyShareLink()">
+            <span class="engage-icon">📤</span>
+        </button>
+    </div>
+
+    <!-- Share Toast -->
+    <div id="shareToast" class="share-toast">Link copied to clipboard!</div>
+
+    <footer class="footer py-5 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2026 BlogHub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+    <script>
+        // Post Page Logic
+        const urlParams = new URLSearchParams(window.location.search);
+        const postId = urlParams.get('id');
+        let currentPost = null;
+
+        async function initPostPage() {
+            if (!postId) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                // Fetch post data
+                const { data: post, error } = await supabaseClient
+                    .from('posts')
+                    .select('*, profiles:user_id(*)')
+                    .eq('id', postId)
+                    .single();
+
+                if (error) throw error;
+                currentPost = post;
+
+                // Update UI
+                document.title = `${post.title} - BlogHub`;
+                document.getElementById('postTitle').innerHTML = post.title; // Allow rich title
+                document.getElementById('postContent').innerHTML = post.content;
+                
+                const date = new Date(post.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'long', day: 'numeric'
+                });
+                document.getElementById('postDate').textContent = date;
+
+                // Apply Cover Image
+                if (post.cover_url) {
+                    const img = document.getElementById('postCover');
+                    img.src = post.cover_url;
+                    img.classList.remove('d-none');
+                }
+
+                // Apply Custom Theme & Typography
+                if (post.theme_color) {
+                    document.documentElement.style.setProperty('--accent', post.theme_color);
+                }
+                if (post.typography) {
+                    document.getElementById('postContent').style.fontFamily = post.typography;
+                    document.getElementById('postTitle').style.fontFamily = post.typography;
+                }
+
+                // Author Info
+                const author = post.profiles?.username || 'Anonymous';
+                const initial = author.charAt(0).toUpperCase();
+                document.getElementById('authorName').textContent = author;
+                document.getElementById('authorNameLg').textContent = author;
+                document.getElementById('authorAvatar').textContent = initial;
+                document.getElementById('authorAvatarLg').textContent = initial;
+                if (post.profiles?.bio) document.getElementById('authorBio').textContent = post.profiles.bio;
+                document.getElementById('authorLink').href = `profile.html?user=${post.user_id}`;
+                document.getElementById('viewProfileBtn').href = `profile.html?user=${post.user_id}`;
+
+                // Reading Time
+                const plainText = post.content.replace(/<[^>]*>/g, '');
+                const words = plainText.trim().split(/\s+/).length;
+                const minutes = Math.ceil(words / 200) || 1;
+                document.getElementById('readingTime').textContent = `${minutes} min read`;
+
+                // Engagement Data (Local Fallback)
+                loadEngagementData();
+                updateBookmarkIcon();
+
+                // Check Auth for Comments
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (user) {
+                    document.getElementById('commentForm').classList.remove('d-none');
+                    document.getElementById('loginToComment').classList.add('d-none');
+                    document.getElementById('currentUserAvatar').textContent = (user.user_metadata?.username || user.email).charAt(0).toUpperCase();
+                }
+
+                initReadingProgress();
+                
+            } catch (err) {
+                console.error('Error loading post:', err);
+                document.getElementById('postTitle').textContent = 'Post not found';
+            }
+        }
+
+        function initReadingProgress() {
+            window.addEventListener('scroll', () => {
+                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (winScroll / height) * 100;
+                document.getElementById('readingProgress').style.width = scrolled + "%";
+            });
+        }
+
+        // --- Engagement Logic ---
+
+        function loadEngagementData() {
+            // Claps (Local Storage Fallback)
+            const claps = localStorage.getItem(`claps_${postId}`) || 0;
+            document.getElementById('clapCount').textContent = claps;
+
+            // Comments (Local Storage Fallback)
+            const comments = JSON.parse(localStorage.getItem(`comments_${postId}`) || '[]');
+            renderComments(comments);
+        }
+
+        function handleClaps() {
+            const currentClaps = parseInt(document.getElementById('clapCount').textContent);
+            const newClaps = currentClaps + 1;
+            document.getElementById('clapCount').textContent = newClaps;
+            localStorage.setItem(`claps_${postId}`, newClaps);
+            
+            const btn = document.getElementById('clapBtn');
+            btn.classList.add('is-active');
+            setTimeout(() => btn.classList.remove('is-active'), 500);
+        }
+
+        function renderComments(comments) {
+            const list = document.getElementById('commentsList');
+            document.getElementById('commentCount').textContent = comments.length;
+            document.getElementById('footerCommentCount').textContent = comments.length;
+
+            if (comments.length === 0) {
+                list.innerHTML = '<div class="comments-empty">No responses yet. Be the first to share your thoughts!</div>';
+                return;
+            }
+
+            list.innerHTML = comments.map(c => `
+                <div class="comment-card">
+                    <div class="comment-avatar">${c.author.charAt(0).toUpperCase()}</div>
+                    <div class="comment-body">
+                        <div class="comment-header">
+                            <span class="comment-author">${c.author}</span>
+                            <span class="comment-time">${formatTimeAgo(c.timestamp)}</span>
+                        </div>
+                        <p class="comment-text">${c.text}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function postComment() {
+            const input = document.getElementById('commentInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const username = user.user_metadata?.username || user.email.split('@')[0];
+
+            const comments = JSON.parse(localStorage.getItem(`comments_${postId}`) || '[]');
+            comments.unshift({
+                author: username,
+                text: text,
+                timestamp: Date.now()
+            });
+
+            localStorage.setItem(`comments_${postId}`, JSON.stringify(comments));
+            input.value = '';
+            renderComments(comments);
+        }
+
+        function toggleBookmark() {
+            const bookmarks = JSON.parse(localStorage.getItem('bloghub_bookmarks') || '[]');
+            const index = bookmarks.indexOf(postId);
+            
+            if (index > -1) {
+                bookmarks.splice(index, 1);
+            } else {
+                bookmarks.push(postId);
+            }
+            
+            localStorage.setItem('bloghub_bookmarks', JSON.stringify(bookmarks));
+            updateBookmarkIcon();
+        }
+
+        function updateBookmarkIcon() {
+            const bookmarks = JSON.parse(localStorage.getItem('bloghub_bookmarks') || '[]');
+            const isBookmarked = bookmarks.includes(postId);
+            const icon = document.getElementById('bookmarkIcon');
+            const btn = document.getElementById('bookmarkBtn');
+            
+            icon.textContent = isBookmarked ? '🔖' : '🔖'; 
+            btn.classList.toggle('is-active', isBookmarked);
+        }
+
+        function copyShareLink() {
+            navigator.clipboard.writeText(window.location.href);
+            const toast = document.getElementById('shareToast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function formatTimeAgo(timestamp) {
+            const diff = Date.now() - timestamp;
+            const seconds = Math.floor(diff / 1000);
+            if (seconds < 60) return 'just now';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            return new Date(timestamp).toLocaleDateString();
+        }
+
+        initPostPage();
+    </script>
+</body>
+</html>

@@ -195,21 +195,29 @@ async function loadPosts() {
 
     container.innerHTML = posts
       .map((post) => {
+        // Strip HTML tags for excerpt
+        const plainText = post.content.replace(/<[^>]*>/g, '');
         const excerpt =
-          post.content.substring(0, 150) +
-          (post.content.length > 150 ? "..." : "");
+          plainText.substring(0, 120) +
+          (plainText.length > 120 ? "..." : "");
+          
         const date = new Date(post.created_at).toLocaleDateString("en-US", {
           year: "numeric",
           month: "short",
           day: "numeric",
         });
+        
         const author = post.profiles?.username || "Anonymous";
         const initial = author.charAt(0).toUpperCase();
+
+        // Calculate reading time
+        const words = plainText.trim().split(/\s+/).length;
+        const readTime = Math.ceil(words / 200) || 1;
 
         return `
                         <div class="col-md-6 col-lg-4">
                             <div class="post-card" onclick="viewPost('${post.id}')">
-                                <span class="post-category">📝 Article</span>
+                                ${post.cover_url ? `<img src="${post.cover_url}" class="card-img-top mb-3 rounded" style="height:160px; object-fit:cover;" alt="Cover">` : '<span class="post-category">📝 Article</span>'}
                                 <h3 class="post-title">${post.title}</h3>
                                 <p class="post-excerpt">${excerpt}</p>
                                 <div class="post-meta">
@@ -217,7 +225,10 @@ async function loadPosts() {
                                         <div class="author-avatar">${initial}</div>
                                         <span class="author-name">${author}</span>
                                     </div>
-                                    <span class="post-date">${date}</span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="post-date text-nowrap">${date}</span>
+                                        <span class="badge bg-secondary rounded-pill fw-normal">${readTime} min</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
